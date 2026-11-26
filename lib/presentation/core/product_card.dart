@@ -1,10 +1,9 @@
 import 'package:crafty_bay/core/app_colors.dart';
+import 'package:crafty_bay/core/app_strings.dart';
 import 'package:flutter/material.dart';
 
-/// Reusable product tile: image, title, price, rating and wishlist button.
-///
-/// Used by Home, Product list, Wishlist, etc. Receives all data and
-/// callbacks via parameters — no provider access or hardcoded text.
+/// Reusable product tile: image, title, price, rating and product actions.
+/// Used by Home, Product lists, Wishlist, and category pages.
 class ProductCard extends StatelessWidget {
   const ProductCard({
     super.key,
@@ -16,6 +15,7 @@ class ProductCard extends StatelessWidget {
     this.isWished = false,
     this.onTap,
     this.onWishTap,
+    this.onCartTap,
   });
 
   final ImageProvider image;
@@ -30,6 +30,7 @@ class ProductCard extends StatelessWidget {
   final bool isWished;
   final VoidCallback? onTap;
   final VoidCallback? onWishTap;
+  final VoidCallback? onCartTap;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +87,6 @@ class ProductCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        // Scales price + rating down so narrow grid cells never overflow.
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
@@ -120,28 +120,61 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: onWishTap,
-                        child: Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Icon(
-                            isWished ? Icons.favorite : Icons.favorite_border,
-                            size: 14,
-                            color: AppColors.textOnPrimary,
-                          ),
+                      if (onCartTap != null) ...[
+                        const SizedBox(width: 4),
+                        _ProductActionButton(
+                          icon: Icons.add_shopping_cart,
+                          tooltip: AppStrings.addToCart,
+                          onTap: onCartTap!,
                         ),
-                      ),
+                      ],
+                      if (onWishTap != null) ...[
+                        const SizedBox(width: 4),
+                        _ProductActionButton(
+                          icon: isWished
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          tooltip: AppStrings.wishList,
+                          onTap: onWishTap!,
+                        ),
+                      ],
                     ],
                   ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductActionButton extends StatelessWidget {
+  const _ProductActionButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(icon, size: 14, color: AppColors.textOnPrimary),
         ),
       ),
     );

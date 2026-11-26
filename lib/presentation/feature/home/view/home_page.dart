@@ -1,7 +1,6 @@
 import 'package:crafty_bay/core/app_colors.dart';
 import 'package:crafty_bay/core/app_strings.dart';
 import 'package:crafty_bay/domain/entities/category.dart';
-import 'package:crafty_bay/presentation/data/dummy_data.dart';
 import 'package:crafty_bay/presentation/feature/categories/provider/category_provider.dart';
 import 'package:crafty_bay/presentation/feature/home/provider/brand_provider.dart';
 import 'package:crafty_bay/presentation/feature/home/provider/product_provider.dart';
@@ -13,7 +12,6 @@ import 'package:crafty_bay/presentation/feature/categories/view/category_product
 import 'package:crafty_bay/presentation/feature/home/widgets/home_app_bar.dart';
 import 'package:crafty_bay/presentation/feature/home/widgets/home_banner_carousel.dart';
 import 'package:crafty_bay/presentation/feature/home/widgets/home_category_section.dart';
-import 'package:crafty_bay/presentation/feature/home/widgets/home_product_section.dart';
 import 'package:crafty_bay/presentation/feature/home/widgets/home_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -112,9 +110,22 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-            const HomeProductSection(
-              title: AppStrings.newArrival,
-              products: DummyData.products,
+            Consumer<ProductProvider>(
+              builder: (_, provider, _) {
+                if (provider.isLoading && provider.products.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                // Keep the New row in place, using product ids so its actions
+                // reach the same cart and wishlist APIs as the other rows.
+                return HomeApiProductSection(
+                  title: AppStrings.newArrival,
+                  products: provider.products.take(4).toList(),
+                );
+              },
             ),
           ],
         ),
